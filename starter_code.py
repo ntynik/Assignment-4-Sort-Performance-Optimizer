@@ -33,7 +33,14 @@ def bubble_sort(arr):
     # Hint: Use nested loops - outer loop for passes, inner loop for comparisons
     # Hint: Compare adjacent elements and swap if left > right
     
-    pass  # Delete this and write your code
+    for i in range(len(arr)):
+        for j in range(0, len(arr) - i - 1):
+            if arr[j] > arr[j + 1]:
+                temp = arr[j]
+                arr[j] = arr[j+1]
+                arr[j+1] = temp
+
+    return arr
 
 
 def selection_sort(arr):
@@ -55,7 +62,17 @@ def selection_sort(arr):
     # TODO: Implement selection sort
     # Hint: Find minimum element in unsorted portion, swap it with first unsorted element
     
-    pass  # Delete this and write your code
+    size = len(arr)
+    for step in range(size):
+        min_idx = step
+
+        for i in range(step + 1, size):
+            if arr[i] < arr[min_idx]:
+                min_idx = i
+        
+        (arr[step], arr[min_idx]) = (arr[min_idx], arr[step])
+
+    return arr
 
 
 def insertion_sort(arr):
@@ -77,8 +94,36 @@ def insertion_sort(arr):
     # TODO: Implement insertion sort
     # Hint: Start from second element, insert it into correct position in sorted portion
     
-    pass  # Delete this and write your code
+    for step in range(1, len(arr)):
+        key = arr[step]
+        j = step - 1
+        
+        while j >= 0 and key < arr[j]:
+            arr[j + 1] = arr[j]
+            j = j - 1
+        
+        arr[j + 1] = key
 
+    return arr
+
+
+def merge(left, right):
+    sorted_list = []
+    i = 0
+    j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            sorted_list.append(left[i])
+            i += 1
+        else:
+            sorted_list.append(right[j])
+            j += 1
+
+    sorted_list.extend(left[i:])
+    sorted_list.extend(right[j:])
+
+    return sorted_list
 
 def merge_sort(arr):
     """
@@ -101,7 +146,14 @@ def merge_sort(arr):
     # Hint: Recursive case - split array in half, sort each half, merge sorted halves
     # Hint: You'll need a helper function to merge two sorted arrays
     
-    pass  # Delete this and write your code
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left_half = merge_sort(arr[:mid])
+    right_half = merge_sort(arr[mid:])
+
+    return merge(left_half, right_half)
 
 
 # ============================================================================
@@ -132,7 +184,27 @@ def demonstrate_stability():
     # Hint: Or extract prices, sort them, and check if stable algorithms maintain original order
     # Hint: For stable sort: items with price 999 should stay in order (B before D)
     # Hint: For stable sort: items with price 1999 should stay in order (A before C before E)
-    
+
+    class Product:
+        def __init__(self, product):
+            self.product = product
+
+        def __lt__(self, other):
+            return self.product["price"] < other.product["price"]
+
+        def __le__(self, other):
+            return self.product["price"] <= other.product["price"]
+
+        def __gt__(self, other):
+            return self.product["price"] > other.product["price"]
+
+    algorithms = {
+        "bubble_sort": bubble_sort,
+        "selection_sort": selection_sort,
+        "insertion_sort": insertion_sort,
+        "merge_sort": merge_sort
+    }
+
     results = {
         "bubble_sort": "Not tested",
         "selection_sort": "Not tested", 
@@ -141,7 +213,28 @@ def demonstrate_stability():
     }
     
     # TODO: Test each algorithm and update results dictionary with "Stable" or "Unstable"
-    
+
+    for name, sort_function in algorithms.items():
+        wrapped_products = [Product(p) for p in products]
+        sorted_products = sort_function(wrapped_products)
+
+        previous_positions = {}
+        stable = True
+
+        for item in sorted_products:
+            product = item.product
+            price = product["price"]
+            position = product["original_position"]
+
+            if (price in previous_positions
+                    and position < previous_positions[price]):
+                stable = False
+                break
+
+            previous_positions[price] = position
+
+        results[name] = "Stable" if stable else "Unstable"
+
     return results
 
 
@@ -287,8 +380,8 @@ if __name__ == "__main__":
     
     # Uncomment these as you complete each part:
     
-    # test_sorting_correctness()
-    # benchmark_all_datasets()
-    # analyze_stability()
+    test_sorting_correctness()
+    benchmark_all_datasets()
+    analyze_stability()
     
     print("\n⚠ Uncomment the test functions in the main block to run benchmarks!")
